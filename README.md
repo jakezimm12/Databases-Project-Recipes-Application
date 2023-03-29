@@ -1,1 +1,1 @@
-# Databases-Project-Recipes-and-Reviews-Web-Application
+# Databases-Project-Recipes-Application
