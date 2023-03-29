@@ -1,0 +1,9 @@
+{
+  "rds_host": "recipes-reviews-project-5500.cv4xygu8kbkm.us-east-1.rds.amazonaws.com",
+  "rds_port": "3306",
+  "rds_user": "jkkf",
+  "rds_password" : "jkkfrecipes",
+  "rds_db": "Recipes_Interactions",
+  "server_host": "localhost",
+  "server_port":"8080"
+}
