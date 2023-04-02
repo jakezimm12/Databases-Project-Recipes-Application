@@ -19,8 +19,8 @@ connection.connect((err) => err && console.log(err));
 const recipe_guesser = async function(req, res) {
 
   connection.query(`
-    SELECT *
-    FROM testtable
+  SELECT id, name FROM Recipe
+  WHERE name='Bourbon Pecan Pound Cake'
   `, (err, data) => {
     if (err || data.length === 0) {
       console.log(err);

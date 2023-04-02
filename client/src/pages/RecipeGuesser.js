@@ -19,7 +19,7 @@ export default function RecipeGuesser() {
     return (
         <Container>
             Hello from inside RecipeGuesser component.\n
-            Values of getting the testtable inside our project's database: id: {testValues.id}, name: {testValues.name}
+            Values of getting a recipe inside our project's database: id: {testValues.id}, name: {testValues.name}
         </Container>
     );
 };
