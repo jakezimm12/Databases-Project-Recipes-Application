@@ -34,6 +34,102 @@ const recipe_guesser = async function(req, res) {
   });
 }
 
+// GET /given_recipe/:recipe_id
+const given_recipe = async function(req, res) {
+  const recipe_id = req.params.recipe_id;
+
+  connection.query(`
+    WITH GivenRecipe AS (
+      SELECT DISTINCT *
+      FROM Recipe r
+      JOIN RecipeIngredient ri on r.id = ri.recipe_id
+      WHERE r.id = ${recipe_id}
+    )
+    SELECT
+      r.id,
+      r.name,
+      AVG(rt.rating) as avg_rating,
+      r.calories,
+      COUNT(DISTINCT ri.ingredient_id) AS num_common_ingredients
+    FROM Recipe r
+    JOIN RecipeIngredient ri on r.id = ri.recipe_id
+    JOIN Rating rt ON rt.recipe_id = r.id
+    WHERE r.id <> ${recipe_id}
+    AND r.calories BETWEEN (SELECT AVG(0.9 * calories) FROM GivenRecipe) AND (SELECT AVG(1.1 * calories) FROM GivenRecipe)
+    AND ri.ingredient_id IN (
+      SELECT DISTINCT ingredient_id
+      FROM GivenRecipe
+    )
+    GROUP BY r.id, r.name
+    ORDER BY num_common_ingredients DESC, avg_rating DESC
+    LIMIT 5
+  `, (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+const top_contributors = async function(req, res) {
+  connection.query(`
+    WITH TopContributors AS (
+      SELECT
+          r.user_id
+      FROM Recipe r
+      JOIN Rating rt ON rt.recipe_id = r.id
+      GROUP BY r.user_id
+      HAVING COUNT(DISTINCT r.id)>=20
+      AND AVG(rt.rating)>=4.5
+    )
+    SELECT
+      r.id,
+      r.name,
+      COUNT(DISTINCT tc.user_id) / (SELECT COUNT(user_id) FROM TopContributors) num_top_contributors,
+      AVG(rt.rating) avg_rating
+    FROM Recipe r
+    JOIN Rating rt ON rt.recipe_id = r.id
+    JOIN TopContributors tc ON tc.user_id = rt.user_id
+    WHERE r.user_id NOT IN (SELECT tc.user_id FROM TopContributors)
+    GROUP BY r.id, r.name
+    HAVING COUNT(DISTINCT tc.user_id) >= 0.05 * (SELECT COUNT(user_id) FROM TopContributors)
+    ORDER BY 3 DESC, 4 DESC
+    LIMIT 5
+    ;
+  `, (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  });
+}
+
+const specific_ingredients = async function(req, res) {
+  const ingredients = req.query.ingredients.split(',');
+  connection.query(`
+  SELECT DISTINCT r.id, r.name
+  FROM Recipe r
+  JOIN RecipeIngredient ri on r.id = ri.recipe_id
+  JOIN Ingredient i ON i.id = ri.ingredient_id
+  WHERE i.ingredient IN (?)
+  GROUP BY r.id, r.name
+  HAVING COUNT(DISTINCT ri.ingredient_id) = ?
+  LIMIT 5
+  ;  
+  `, [ingredients, ingredients.length], (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  });
+}
+
 /******************
  * WARM UP ROUTES *
  ******************/
@@ -307,6 +403,9 @@ const search_songs = async function(req, res) {
 
 module.exports = {
   recipe_guesser,
+  given_recipe,
+  top_contributors,
+  specific_ingredients,
   author,
   random,
   song,
