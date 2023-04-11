@@ -16,8 +16,8 @@ connection.connect((err) => err && console.log(err));
  * FOOD.COM FINAL PROJECT ROUTES *
  ******************/
 
+// Test Route
 const recipe_guesser = async function(req, res) {
-
   connection.query(`
   SELECT id, name FROM Recipe
   WHERE name='Bourbon Pecan Pound Cake'
@@ -73,6 +73,7 @@ const given_recipe = async function(req, res) {
   });
 }
 
+// GET /top_contributors
 const top_contributors = async function(req, res) {
   connection.query(`
     WITH TopContributors AS (
@@ -108,6 +109,7 @@ const top_contributors = async function(req, res) {
   });
 }
 
+// GET /specific_ingredients
 const specific_ingredients = async function(req, res) {
   const ingredients = req.query.ingredients.split(',');
   connection.query(`
