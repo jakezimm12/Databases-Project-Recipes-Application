@@ -88,6 +88,7 @@ const top_contributors = async function(req, res) {
     SELECT
       r.id,
       r.name,
+      r.calories,
       COUNT(DISTINCT tc.user_id) / (SELECT COUNT(user_id) FROM TopContributors) num_top_contributors,
       AVG(rt.rating) avg_rating
     FROM Recipe r
@@ -130,6 +131,78 @@ const specific_ingredients = async function(req, res) {
       res.json(data);
     }
   });
+}
+
+// GET /search_filters
+const search_filters = async function(req, res) {
+  // TODO (TASK 12): return all songs that match the given search query with parameters defaulted to those specified in API spec ordered by title (ascending)
+  // Some default parameters have been provided for you, but you will need to fill in the rest
+  
+  // const title = req.query.title ?? '';
+  // const durationLow = req.query.duration_low ?? 60;
+  // const durationHigh = req.query.duration_high ?? 660;
+  // const playsLow = req.query.plays_low ?? 0;
+  // const playsHigh = req.query.plays_high ?? 1100000000;
+  // const danceabilityLow = req.query.danceability_low ?? 0;
+  // const danceabilityHigh = req.query.danceability_high ?? 1;
+  // const energyLow = req.query.energy_low ?? 0;
+  // const energyHigh = req.query.energy_high ?? 1;
+  // const valenceLow = req.query.valence_low ?? 0;
+  // const valenceHigh = req.query.valence_high ?? 1;
+  // const explicit = req.query.explicit === 'true' ? 1 : 0;
+
+  const searchBar = req.query.searchBar ?? '';
+  const minCalories = req.query.minCalories ?? 0;
+  let maxCalories = 100000;
+  if(req.query.maxCalories && req.query.maxCalories > 0){
+    maxCalories = req.query.maxCalories;
+  }
+
+  // Will use this version in the final if we can get the query time lower
+  // SELECT id, name, calories, AVG(rating) AS avg_rating
+  // FROM Recipe r
+  // JOIN Rating ON r.id = Rating.recipe_id
+  // WHERE name LIKE '%${searchBar}%'
+  // AND calories BETWEEN ${calorieMin} AND ${calorieMax}
+  // GROUP BY id, name, calories
+  // HAVING COUNT(*) >= 3
+  // ORDER BY avg_rating DESC
+  // LIMIT 5
+
+  connection.query(`
+  SELECT id, name, calories
+  FROM Recipe r
+  WHERE name LIKE '%${searchBar}%'
+  AND calories BETWEEN ${minCalories} AND ${maxCalories}
+  LIMIT 5
+  `, (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err)
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  });
+
+  // connection.query(`
+  //   SELECT song_id, album_id, title, number, duration, plays, danceability, energy, valence, tempo, key_mode, explicit
+  //   FROM Songs S
+  //   WHERE title LIKE '%${title}%'
+  //   AND duration BETWEEN ${durationLow} AND ${durationHigh}
+  //   AND plays BETWEEN ${playsLow} AND ${playsHigh}
+  //   AND danceability BETWEEN ${danceabilityLow} AND ${danceabilityHigh}
+  //   AND energy BETWEEN ${energyLow} AND ${energyHigh}
+  //   AND valence BETWEEN ${valenceLow} AND ${valenceHigh}
+  //   AND explicit <= ${explicit}
+  //   ORDER BY title
+  //   `, (err, data) => {
+  //     if (err || data.length === 0) {
+  //       console.log(err);
+  //       res.json({});
+  //     } else {
+  //       res.json(data);
+  //     }
+  //   });
 }
 
 /******************
@@ -408,6 +481,7 @@ module.exports = {
   given_recipe,
   top_contributors,
   specific_ingredients,
+  search_filters,
   author,
   random,
   song,

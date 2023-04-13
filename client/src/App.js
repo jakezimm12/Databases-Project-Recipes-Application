@@ -1,45 +1,107 @@
+import React, { useEffect, useState } from 'react'
+import './App.css';
+import Recipe from './Recipe';
+import NavBar from './components/NavBar';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { CssBaseline, ThemeProvider } from '@mui/material'
-import { indigo, amber } from '@mui/material/colors'
-import { createTheme } from "@mui/material/styles";
+import { Container, Divider, Link } from '@mui/material';
 
-// import NavBar from './components/NavBar';
-// import HomePage from './pages/HomePage';
-// import AlbumsPage from './pages/AlbumsPage';
-// import SongsPage from './pages/SongsPage';
-// import AlbumInfoPage from './pages/AlbumInfoPage'
-import RecipeGuesser from "./pages/RecipeGuesser";
-import RecipeSearch from "./pages/RecipeSearch";
 
-// createTheme enables you to customize the look and feel of your app past the default
-// in this case, we only change the color scheme
-export const theme = createTheme({
-  palette: {
-    primary: indigo,
-    secondary: amber,
-  },
-});
+const config = require('./config.json');
+  
+const App = () => {
+  const APP_ID = "7474409c";
+  const APP_KEY = "d140d9cc41ce2b71d0796eecb09bb8bc";
+  const [recipes, setRecipes] = useState([]);
+  const [search, setSearch] = useState("");
+  const [minCalories, setMinCalories] = useState(0);
+  const [maxCalories, setMaxCalories] = useState(10000);
+  const [query, setQuery] = useState({search, minCalories, maxCalories});
 
-// App is the root component of our application and as children contain all our pages
-// We use React Router's BrowserRouter and Routes components to define the pages for
-// our application, with each Route component representing a page and the common
-// NavBar component allowing us to navigate between pages (with hyperlinks)
-export default function App() {
+
+  // useEffect(() => {
+  //   getRecipes();
+  // }, [query])
+  // const getRecipes = async () => {
+  //   const response = await fetch
+  //         (`https://api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}`);
+  //   const data = await response.json();
+  //   setRecipes(data.hits);
+  //   // console.log(data);
+  // };
+
+  const updateSearch = e => {
+    setSearch(e.target.value);
+  };
+
+  const getSearch = e => {
+    e.preventDefault();
+    setQuery({search, minCalories, maxCalories});
+    setSearch("");
+    setMinCalories(0);
+    setMaxCalories("");
+  };
+
+  // useEffect(() => {
+  //   fetch(`http://${config.server_host}:${config.server_port}/top_contributors`)
+  //       .then(res => res.json())
+  //       .then(resJson => setRecipes(resJson));
+  //   }, []);
+
+  useEffect(() => {
+    fetch(`http://${config.server_host}:${config.server_port}/search_filters?` +
+      `searchBar=${search}&minCalories=${minCalories}&maxCalories=${maxCalories}`
+    )
+        .then(res => res.json())
+        .then(resJson => setRecipes(resJson));
+    }, [query, search, minCalories, maxCalories]);
+  
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <div className="App">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<RecipeGuesser />} /> {/* Just as a filler for the homepage for now. */}
-          <Route path="/recipe_guesser" element={<RecipeGuesser />} />
-          <Route path="/recipe_search" element={<RecipeSearch />} />
-
-          {/* <Route path="/" element={<HomePage />} />
-          <Route path="/albums" element={<AlbumsPage />} />
-          <Route path="/albums/:album_id" element={<AlbumInfoPage />} />
-          <Route path="/songs" element={<SongsPage />} /> */}
-        </Routes>
+        <NavBar />
       </BrowserRouter>
-    </ThemeProvider>
+      <form className="search-form" onSubmit={getSearch}  >
+        <input className="search-bar" type="text" value={search}
+             onChange={updateSearch} />
+        <button className="search-button" type="submit" >
+             Search
+        </button>
+        <input
+          className="recipe-attribute"
+          type="number"
+          placeholder="Minimum calories"
+          value={minCalories}
+          onChange={(e) => setMinCalories(e.target.value)}
+        />
+        <input
+          className="recipe-attribute"
+          type="number"
+          placeholder="Maximum calories"
+          value={maxCalories}
+          onChange={(e) => setMaxCalories(e.target.value)}
+        />
+      </form>
+      <div className="recipes">
+
+        {recipes.map(recipe => (
+          <Recipe
+            key={recipe.id}
+            title={recipe.name}
+            calories={recipe.calories}
+          />
+
+          // <Recipe
+          //   key={recipe.recipe.label}
+          //   title={recipe.recipe.label}
+          //   calories={recipe.recipe.calories}
+          //   image={recipe.recipe.image}
+          //   ingredients={recipe.recipe.ingredients}
+          // />
+  
+        ))}
+      </div>
+    </div>
   );
 }
+  
+export default App;
