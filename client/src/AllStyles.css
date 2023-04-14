@@ -47,3 +47,10 @@
   justify-content: space-around;
   flex-wrap: wrap;
 }
+
+.search-description-text {
+  font-family: 'Lobster', cursive;
+  text-align: center;
+  width: 100%;
+}
+

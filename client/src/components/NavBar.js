@@ -9,10 +9,10 @@ const NavText = ({ href, text, isMain }) => {
       variant={isMain ? 'h5' : 'h7'}
       noWrap
       style={{
-        marginRight: '30px',
-        fontFamily: 'monospace',
+        marginRight: '250px',
+        fontFamily: 'Palatino',
         fontWeight: 700,
-        letterSpacing: '.3rem',
+        letterSpacing: '.4rem',
       }}
     >
       <NavLink
@@ -33,12 +33,11 @@ const NavText = ({ href, text, isMain }) => {
 // props to how it changes the look of the component.
 export default function NavBar() {
   return (
-    <AppBar position='static'>
+    <AppBar position='static' sx={{ bgcolor: 'rgba(144, 238, 144, 0.8)', color: 'white' }}>
       <Container maxWidth='xl'>
         <Toolbar disableGutters>
           <NavText href='/' text='RecipeGuesser.com' isMain />
-          {/* <NavText href='/albums' text='ALBUMS' />
-          <NavText href='/songs' text='SONGS' /> */}
+          <NavText href='/recipe_guesser' text='Recipe Quiz!' />
         </Toolbar>
       </Container>
     </AppBar>

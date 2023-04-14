@@ -105,6 +105,7 @@ const top_contributors = async function(req, res) {
       console.log(err);
       res.json({});
     } else {
+      console.log("Responding with top_contributors route.");
       res.json(data);
     }
   });
@@ -137,28 +138,19 @@ const specific_ingredients = async function(req, res) {
 const search_filters = async function(req, res) {
   // TODO (TASK 12): return all songs that match the given search query with parameters defaulted to those specified in API spec ordered by title (ascending)
   // Some default parameters have been provided for you, but you will need to fill in the rest
-  
-  // const title = req.query.title ?? '';
-  // const durationLow = req.query.duration_low ?? 60;
-  // const durationHigh = req.query.duration_high ?? 660;
-  // const playsLow = req.query.plays_low ?? 0;
-  // const playsHigh = req.query.plays_high ?? 1100000000;
-  // const danceabilityLow = req.query.danceability_low ?? 0;
-  // const danceabilityHigh = req.query.danceability_high ?? 1;
-  // const energyLow = req.query.energy_low ?? 0;
-  // const energyHigh = req.query.energy_high ?? 1;
-  // const valenceLow = req.query.valence_low ?? 0;
-  // const valenceHigh = req.query.valence_high ?? 1;
-  // const explicit = req.query.explicit === 'true' ? 1 : 0;
-
   const searchBar = req.query.searchBar ?? '';
-  const minCalories = req.query.minCalories ?? 0;
+  let minCalories = 0;
+  if(req.query.minCalories && req.query.minCalories >= 0){
+    minCalories = req.query.minCalories;
+  }
   let maxCalories = 100000;
   if(req.query.maxCalories && req.query.maxCalories > 0){
     maxCalories = req.query.maxCalories;
   }
 
-  // Will use this version in the final if we can get the query time lower
+  // Will use this version in the final if we can get the query time lower (query time is very high).
+  // Get's recipes with at least 3 ratings and orders by avg_rating.
+  //
   // SELECT id, name, calories, AVG(rating) AS avg_rating
   // FROM Recipe r
   // JOIN Rating ON r.id = Rating.recipe_id
@@ -176,33 +168,17 @@ const search_filters = async function(req, res) {
   AND calories BETWEEN ${minCalories} AND ${maxCalories}
   LIMIT 5
   `, (err, data) => {
-    if (err || data.length === 0) {
-      console.log(err)
+    if (err) {
+      console.log(err);
       res.json({});
+    } else if (data.length === 0) {
+      console.log("Redirecting to Top C");
+      res.redirect('/top_contributors');
     } else {
+      console.log("Responding with search_filters route.");
       res.json(data);
     }
   });
-
-  // connection.query(`
-  //   SELECT song_id, album_id, title, number, duration, plays, danceability, energy, valence, tempo, key_mode, explicit
-  //   FROM Songs S
-  //   WHERE title LIKE '%${title}%'
-  //   AND duration BETWEEN ${durationLow} AND ${durationHigh}
-  //   AND plays BETWEEN ${playsLow} AND ${playsHigh}
-  //   AND danceability BETWEEN ${danceabilityLow} AND ${danceabilityHigh}
-  //   AND energy BETWEEN ${energyLow} AND ${energyHigh}
-  //   AND valence BETWEEN ${valenceLow} AND ${valenceHigh}
-  //   AND explicit <= ${explicit}
-  //   ORDER BY title
-  //   `, (err, data) => {
-  //     if (err || data.length === 0) {
-  //       console.log(err);
-  //       res.json({});
-  //     } else {
-  //       res.json(data);
-  //     }
-  //   });
 }
 
 /******************
