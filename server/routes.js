@@ -73,44 +73,6 @@ const given_recipe = async function(req, res) {
   });
 }
 
-// GET /top_contributors
-const top_contributors = async function(req, res) {
-  connection.query(`
-    WITH TopContributors AS (
-      SELECT
-          r.user_id
-      FROM Recipe r
-      JOIN Rating rt ON rt.recipe_id = r.id
-      GROUP BY r.user_id
-      HAVING COUNT(DISTINCT r.id)>=20
-      AND AVG(rt.rating)>=4.5
-    )
-    SELECT
-      r.id,
-      r.name,
-      r.calories,
-      COUNT(DISTINCT tc.user_id) / (SELECT COUNT(user_id) FROM TopContributors) num_top_contributors,
-      AVG(rt.rating) avg_rating
-    FROM Recipe r
-    JOIN Rating rt ON rt.recipe_id = r.id
-    JOIN TopContributors tc ON tc.user_id = rt.user_id
-    WHERE r.user_id NOT IN (SELECT tc.user_id FROM TopContributors)
-    GROUP BY r.id, r.name
-    HAVING COUNT(DISTINCT tc.user_id) >= 0.05 * (SELECT COUNT(user_id) FROM TopContributors)
-    ORDER BY 3 DESC, 4 DESC
-    LIMIT 5
-    ;
-  `, (err, data) => {
-    if (err || data.length === 0) {
-      console.log(err);
-      res.json({});
-    } else {
-      console.log("Responding with top_contributors route.");
-      res.json(data);
-    }
-  });
-}
-
 // GET /specific_ingredients
 const specific_ingredients = async function(req, res) {
   const ingredients = req.query.ingredients.split(',');
@@ -134,10 +96,60 @@ const specific_ingredients = async function(req, res) {
   });
 }
 
+// GET /top_contributors
+const top_contributors = async function(req, res) {
+  let numResults = 10;
+  if(req.query.numResults && req.query.numResults >= 0){
+    numResults = req.query.numResults;
+  }
+
+  connection.query(`
+    WITH TopContributors AS (
+      SELECT
+          r.user_id
+      FROM Recipe r
+      JOIN Rating rt ON rt.recipe_id = r.id
+      GROUP BY r.user_id
+      HAVING COUNT(DISTINCT r.id)>=20
+      AND AVG(rt.rating)>=4.5
+    )
+    SELECT
+      r.id,
+      r.name,
+      r.description,
+      r.minute,
+      r.n_steps,
+      r.n_ingredients,
+      r.calories,
+      r.average_rating,
+      r.n_ratings,
+      COUNT(DISTINCT tc.user_id) / (SELECT COUNT(user_id) FROM TopContributors) num_top_contributors
+    FROM Recipe r
+    JOIN Rating rt ON rt.recipe_id = r.id
+    JOIN TopContributors tc ON tc.user_id = rt.user_id
+    WHERE r.user_id NOT IN (SELECT tc.user_id FROM TopContributors)
+    GROUP BY r.id, r.name
+    HAVING COUNT(DISTINCT tc.user_id) >= 0.05 * (SELECT COUNT(user_id) FROM TopContributors)
+    ORDER BY average_rating DESC, num_top_contributors DESC
+    LIMIT ${numResults}
+    ;
+  `, (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      console.log("Responding with top_contributors route.");
+      res.json(data);
+    }
+  });
+}
+
 // GET /search_filters
 const search_filters = async function(req, res) {
   // TODO (TASK 12): return all songs that match the given search query with parameters defaulted to those specified in API spec ordered by title (ascending)
   // Some default parameters have been provided for you, but you will need to fill in the rest
+  
+  // These if statements first check if the it exists, and then if it has some valid value (however this also ensures that it is in fact a number).
   const searchBar = req.query.searchBar ?? '';
   let minCalories = 0;
   if(req.query.minCalories && req.query.minCalories >= 0){
@@ -147,26 +159,47 @@ const search_filters = async function(req, res) {
   if(req.query.maxCalories && req.query.maxCalories > 0){
     maxCalories = req.query.maxCalories;
   }
-
-  // Will use this version in the final if we can get the query time lower (query time is very high).
-  // Get's recipes with at least 3 ratings and orders by avg_rating.
-  //
-  // SELECT id, name, calories, AVG(rating) AS avg_rating
-  // FROM Recipe r
-  // JOIN Rating ON r.id = Rating.recipe_id
-  // WHERE name LIKE '%${searchBar}%'
-  // AND calories BETWEEN ${calorieMin} AND ${calorieMax}
-  // GROUP BY id, name, calories
-  // HAVING COUNT(*) >= 3
-  // ORDER BY avg_rating DESC
-  // LIMIT 5
+  let minNumRatings = 0;
+  if(req.query.minNumRatings && req.query.minNumRatings >= 0){
+    minNumRatings = req.query.minNumRatings;
+  }
+  let minRating = 0;
+  if(req.query.minRating && req.query.minRating >= 0){
+    minRating = req.query.minRating;
+  }
+  let maxNumSteps = 10000;
+  if(req.query.maxNumSteps && req.query.maxNumSteps > 0){
+    maxNumSteps = req.query.maxNumSteps;
+  }
+  let maxTime = 10000;
+  if(req.query.maxTime && req.query.maxTime > 0){
+    maxTime = req.query.maxTime;
+  }
+  let numResults = 10;
+  if(req.query.numResults && req.query.numResults >= 0){
+    numResults = req.query.numResults;
+  }
 
   connection.query(`
-  SELECT id, name, calories
+  SELECT
+    id,
+    name,
+    description,
+    minute,
+    n_steps,
+    n_ingredients,
+    calories,
+    average_rating,
+    n_ratings
   FROM Recipe r
   WHERE name LIKE '%${searchBar}%'
   AND calories BETWEEN ${minCalories} AND ${maxCalories}
-  LIMIT 5
+  AND n_ratings >= ${minNumRatings}
+  AND average_rating >= ${minRating}
+  AND n_steps <= ${maxNumSteps}
+  AND minute <= ${maxTime}
+  ORDER BY n_ratings DESC, average_rating DESC
+  LIMIT ${numResults}
   `, (err, data) => {
     if (err) {
       console.log(err);

@@ -9,7 +9,7 @@ const NavText = ({ href, text, isMain }) => {
       variant={isMain ? 'h5' : 'h7'}
       noWrap
       style={{
-        marginRight: '250px',
+        marginRight: '18rem',
         fontFamily: 'Palatino',
         fontWeight: 700,
         letterSpacing: '.4rem',
