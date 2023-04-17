@@ -15,26 +15,28 @@ const SearchPage = () => {
   const [maxNumSteps, setMaxNumSteps] = useState("");
   const [maxTime, setMaxTime] = useState("");
   const [numResults, setNumResults] = useState(10);
-  // const [query, setQuery] = useState({search, minCalories, maxCalories});
-
+  const [ingredients, setIngredients] = useState([]);
+  const [ingredient, setIngredient] = useState("");
   const [searchText, setSearchText] = useState("Loading...");
 
-//   const getSearch = e => {
-//     e.preventDefault();
-//     // setQuery({search, minCalories, maxCalories});
-//     setSearch("");
-//     setMinCalories("");
-//     setMaxCalories("");
-//     setMinNumRatings("");
-//     setMinRating("");
-//     setMaxNumSteps("");
-//     setMaxTime("");
-//     setNumResults("");
-//   };
+  const handleSubmit = (event) => {
+    event.preventDefault();
+  }
+  
+  const handleAddIngredient = () => {
+    setIngredients([...ingredients, ingredient]);
+    setIngredient("");
+  };
+
+  const handleRemoveIngredient = (index) => {
+    const newIngredients = [...ingredients];
+    newIngredients.splice(index, 1);
+    setIngredients(newIngredients);
+  };  
 
   useEffect(() => {
     setSearchText("Loading...");
-    if (!search && !minCalories && !maxCalories && !minNumRatings && !minRating && !maxNumSteps && !maxTime) {
+    if (!search && ingredients.length === 0 && !minCalories && !maxCalories && !minNumRatings && !minRating && !maxNumSteps && !maxTime) {
       fetch(`http://${config.server_host}:${config.server_port}/top_contributors?numResults=${numResults}`)
         .then(res => res.json())
         .then(resJson => {
@@ -50,20 +52,32 @@ const SearchPage = () => {
         `&minRating=${minRating}` +
         `&maxNumSteps=${maxNumSteps}` +
         `&maxTime=${maxTime}` +
-        `&numResults=${numResults}`
+        `&numResults=${numResults}` +
+        `&ingredients=${ingredients.map((ingredient) => ingredient.toLowerCase()).join(",")}`
       )
         .then(res => res.json())
         .then(resJson => {
-          setRecipes(resJson);
-          setSearchText("Search Results!");
+            console.log(resJson);
+            if (!resJson || resJson.length == 0){
+                console.log("No results.");
+                fetch(`http://${config.server_host}:${config.server_port}/top_contributors?numResults=${numResults}`)
+                    .then(res => res.json())
+                    .then(resJson => {
+                    setRecipes(resJson);
+                    setSearchText("Top recipes from top reviewers!");
+                    });
+            } else{
+                setRecipes(resJson);
+                setSearchText("Search Results!");
+            }
         });
     }
-  }, [search, minCalories, maxCalories, minNumRatings, minRating, minRating, maxNumSteps, maxTime, numResults]);
+  }, [search, minCalories, maxCalories, minNumRatings, minRating, minRating, maxNumSteps, maxTime, numResults, ingredients]);
   
   return (
     <Container>
       {/* <form className="search-form" onSubmit={getSearch}  ></form> */}
-      <form className="search-form" >
+      <form className="search-form" onSubmit={handleSubmit}>
         <input className="search-bar" type="text" placeholder="Direct Search" value={search}
              onChange={(e) => setSearch(e.target.value)} />
         {/* <button className="search-button" type="submit" >
@@ -139,12 +153,30 @@ const SearchPage = () => {
             onChange={(e) => setNumResults(e.target.value)}
             />
         </div>
+        <div>
+            <p className="default-text">Add Ingredient: </p>
+            <input
+                className="recipe-attribute"
+                type="text"
+                placeholder="Enter ingredient"
+                value={ingredient}
+                onChange={(e) => setIngredient(e.target.value)}
+            />
+            <button onClick={handleAddIngredient}>Add</button>
+            {ingredients.map((ingredient, index) => (
+                <div key={index} className="ingredient">
+                    {ingredient}
+                    <button onClick={() => handleRemoveIngredient(index)}>x</button>
+                </div>
+            ))}
+        </div>
+
       </form>
       <div className="recipes">
-        <p className="search-description-text">{recipes.length > 0 ? searchText : "Loading..."}</p>
+        <p className="search-description-text">{(Array.isArray(recipes) && recipes.length > 0) ? searchText : "Loading..."}</p>
         {console.log(recipes)}
-        {recipes.map(recipe => (
-          <Recipe
+        {Array.isArray(recipes) && recipes.map(recipe => (
+            <Recipe
             key={recipe.id}
             name={recipe.name}
             description={recipe.description}
@@ -154,9 +186,10 @@ const SearchPage = () => {
             average_rating={recipe.average_rating}
             calories={recipe.calories}
             n_ratings={recipe.n_ratings}
-          />
+            />
         ))}
       </div>
+
     </Container>
   );
 }

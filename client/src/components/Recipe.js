@@ -17,6 +17,7 @@ const Recipe = ({name,description, minute, n_steps, n_ingredients, average_ratin
 <p><strong>Cook Time(mins): </strong>{minute}</p>
 <p><strong>Number of Steps: </strong>{n_steps}</p>
 <p><strong>Number of Ingredients: </strong>{n_ingredients}</p>
+{/* <p><strong>Ingredients: </strong>{ingredients}</p> Would take to long in the search page to get all ingredients using joins unless we use NoSQL. */}
 <p><strong>Calories: </strong>{calories}</p>
   
             {/* <img className={style.image} src={image} alt=""/> */}

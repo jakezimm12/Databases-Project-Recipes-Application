@@ -77,14 +77,22 @@ const given_recipe = async function(req, res) {
 const specific_ingredients = async function(req, res) {
   const ingredients = req.query.ingredients.split(',');
   connection.query(`
-  SELECT DISTINCT r.id, r.name
+  SELECT DISTINCT
+    r.id,
+    r.name,
+    r.description,
+    r.minute,
+    r.n_steps,
+    r.n_ingredients,
+    r.calories,
+    r.average_rating,
+    r.n_ratings
   FROM Recipe r
   JOIN RecipeIngredient ri on r.id = ri.recipe_id
   JOIN Ingredient i ON i.id = ri.ingredient_id
   WHERE i.ingredient IN (?)
   GROUP BY r.id, r.name
   HAVING COUNT(DISTINCT ri.ingredient_id) = ?
-  LIMIT 5
   ;  
   `, [ingredients, ingredients.length], (err, data) => {
     if (err || data.length === 0) {
@@ -146,11 +154,16 @@ const top_contributors = async function(req, res) {
 
 // GET /search_filters
 const search_filters = async function(req, res) {
-  // TODO (TASK 12): return all songs that match the given search query with parameters defaulted to those specified in API spec ordered by title (ascending)
-  // Some default parameters have been provided for you, but you will need to fill in the rest
-  
-  // These if statements first check if the it exists, and then if it has some valid value (however this also ensures that it is in fact a number).
   const searchBar = req.query.searchBar ?? '';
+  let ingredients = '';
+  if (req.query.ingredients && req.query.ingredients.trim() !== '') {
+    ingredients = req.query.ingredients.trim().split(',');
+  }
+  let ingredientsCount = 0;
+  if (ingredients) {
+    ingredientsCount = ingredients.length;
+  }
+  console.log("Ingredients: " + ingredients[0] + ingredients[1]);
   let minCalories = 0;
   if(req.query.minCalories && req.query.minCalories >= 0){
     minCalories = req.query.minCalories;
@@ -180,39 +193,56 @@ const search_filters = async function(req, res) {
     numResults = req.query.numResults;
   }
 
-  connection.query(`
-  SELECT
-    id,
-    name,
-    description,
-    minute,
-    n_steps,
-    n_ingredients,
-    calories,
-    average_rating,
-    n_ratings
-  FROM Recipe r
-  WHERE name LIKE '%${searchBar}%'
-  AND calories BETWEEN ${minCalories} AND ${maxCalories}
-  AND n_ratings >= ${minNumRatings}
-  AND average_rating >= ${minRating}
-  AND n_steps <= ${maxNumSteps}
-  AND minute <= ${maxTime}
-  ORDER BY n_ratings DESC, average_rating DESC
-  LIMIT ${numResults}
-  `, (err, data) => {
-    if (err) {
+  let query = `
+    SELECT
+      id,
+      name,
+      description,
+      minute,
+      n_steps,
+      n_ingredients,
+      calories,
+      average_rating,
+      n_ratings
+    FROM Recipe
+    WHERE name LIKE '%${searchBar}%'
+    `;
+  if (ingredientsCount > 0) {
+    query += `
+      AND id IN (
+        SELECT DISTINCT recipe_id
+        FROM RecipeIngredient
+        WHERE ingredient_id IN (
+          SELECT id
+          FROM Ingredient
+          WHERE ingredient IN (${ingredients.map(() => '?').join(',')})
+        )
+        GROUP BY recipe_id
+        HAVING COUNT(DISTINCT ingredient_id) = ${ingredientsCount}
+      )
+    `;
+  }
+  query += `
+    AND calories BETWEEN ${minCalories} AND ${maxCalories}
+    AND n_ratings >= ${minNumRatings}
+    AND average_rating >= ${minRating}
+    AND n_steps <= ${maxNumSteps}
+    AND minute <= ${maxTime}
+    ORDER BY n_ratings DESC, average_rating DESC
+    LIMIT ${numResults}
+  `;
+  connection.query(query, ingredients, (err, data) => {
+    if (err || data.length === 0) {
+      console.log(query);
       console.log(err);
       res.json({});
-    } else if (data.length === 0) {
-      console.log("Redirecting to Top C");
-      res.redirect('/top_contributors');
     } else {
       console.log("Responding with search_filters route.");
       res.json(data);
     }
   });
-}
+};
+
 
 /******************
  * WARM UP ROUTES *
