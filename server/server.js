@@ -14,7 +14,7 @@ app.use(cors({
 app.get('/recipe_guesser', routes.recipe_guesser);
 app.get('/given_recipe/:recipe_id', routes.given_recipe);
 app.get('/top_contributors', routes.top_contributors);
-app.get('/specific_ingredients', routes.specific_ingredients);
+app.get('/specific_ingredients/:ingredients', routes.specific_ingredients);
 app.get('/search_filters', routes.search_filters);
 
 // app.get('/author/:type', routes.author);

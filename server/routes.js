@@ -37,6 +37,7 @@ const recipe_guesser = async function(req, res) {
 // GET /given_recipe/:recipe_id
 const given_recipe = async function(req, res) {
   const recipe_id = req.params.recipe_id;
+  console.log(recipe_id);
 
   connection.query(`
     WITH GivenRecipe AS (
@@ -73,9 +74,9 @@ const given_recipe = async function(req, res) {
   });
 }
 
-// GET /specific_ingredients
+// GET /specific_ingredients/ingredients
 const specific_ingredients = async function(req, res) {
-  const ingredients = req.query.ingredients.split(',');
+  const ingredients = req.params.ingredients.split(',');
   connection.query(`
   SELECT DISTINCT
     r.id,
@@ -93,9 +94,11 @@ const specific_ingredients = async function(req, res) {
   WHERE i.ingredient IN (?)
   GROUP BY r.id, r.name
   HAVING COUNT(DISTINCT ri.ingredient_id) = ?
+  LIMIT 5
   ;  
   `, [ingredients, ingredients.length], (err, data) => {
     if (err || data.length === 0) {
+      console.log("here");
       console.log(err);
       res.json({});
     } else {
