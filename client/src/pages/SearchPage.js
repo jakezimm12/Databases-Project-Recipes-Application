@@ -58,7 +58,7 @@ const SearchPage = () => {
         .then(res => res.json())
         .then(resJson => {
             console.log(resJson);
-            if (!resJson || resJson.length == 0){
+            if (!Array.isArray(resJson) || !resJson || resJson.length == 0){
                 console.log("No results.");
                 fetch(`http://${config.server_host}:${config.server_port}/top_contributors?numResults=${numResults}`)
                     .then(res => res.json())
