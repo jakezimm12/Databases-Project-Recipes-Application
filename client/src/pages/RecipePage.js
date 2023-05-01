@@ -21,6 +21,8 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
+import Header from '../components/Header';
+
 const config = require('../config.json');
 
 export default function RecipePage() {
@@ -53,6 +55,9 @@ export default function RecipePage() {
   const stepNumData = stepData.map((step) => ({step_num: `${step.step_n}. ${step.step}`, ...step}))
 
   return (
+
+    <Container>
+      <Header/>
       <Grid container spacing={2} display="flex" direction="row" alignItems="stretch">
 
         <Grid item xs={12}>
@@ -159,5 +164,6 @@ export default function RecipePage() {
 
 
       </Grid>
+      </Container>
   );
 }

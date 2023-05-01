@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Container, Divider, Link } from '@mui/material';
-import '../AllStyles.css'; // Just putting all the style components here rather than having a separate css file for each page (since it's a simple application)
+import './SearchPage.css'; // Just putting all the style components here rather than having a separate css file for each page (since it's a simple application)
 import Recipe from '../components/Recipe';
+import Header from '../components/Header';
 
 const config = require('../config.json');
   
@@ -76,6 +77,7 @@ const SearchPage = () => {
   
   return (
     <Container>
+      <Header/>
       {/* <form className="search-form" onSubmit={getSearch}  ></form> */}
       <form className="search-form" onSubmit={handleSubmit}>
         <input className="search-bar" type="text" placeholder="Direct Search" value={search}
@@ -178,6 +180,7 @@ const SearchPage = () => {
         {Array.isArray(recipes) && recipes.map(recipe => (
             <Recipe
             key={recipe.id}
+            id={recipe.id}
             name={recipe.name}
             description={recipe.description}
             minute={recipe.minute}

@@ -1,0 +1,29 @@
+@import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
+.recipe{
+	border-radius: 10px;
+	box-shadow: 0px 5px 20px rgb(63, 60, 60);
+	margin: 20px;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+	/* justify-content: space-around; */
+	text-align: center;
+	background-image: linear-gradient(to right,
+		#ffffff 0%, #ffffff 0%, #ffffff 0%,
+		#acade0 30%, #7073d6 64%, #444ae2 100%);
+	align-items: center;
+	min-width: 30%;
+	max-width: 40%;
+	font-family: 'Lobster', cursive;
+}
+
+.recipe p {
+	font-family: Verdana, sans-serif;
+	text-align: left;
+	margin: 5px;
+  }
+
+.image{
+	border-radius: 10px;
+	margin:0px 0px 20px 0px;
+}

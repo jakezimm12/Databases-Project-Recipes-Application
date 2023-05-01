@@ -19,7 +19,6 @@ export default function RecipeTable({defaultPageSize, rowsPerPageOptions }) {
     .then(resJson => setRecipeData(resJson))
   }, []);
 
-
   return (
     <TableContainer component={Paper}>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
@@ -38,7 +37,7 @@ export default function RecipeTable({defaultPageSize, rowsPerPageOptions }) {
               key={row.name}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
-              <TableCell component="th" scope="row" component={Link} to='recipe/2886'>{row.name}</TableCell>
+              <TableCell scope="row" component={Link} to={`/recipe/${row.id}`}>{row.name}</TableCell>
               <TableCell align="right">{row.avg_rating}</TableCell>
               <TableCell align="right">{row.num_rating}</TableCell>
             </TableRow>

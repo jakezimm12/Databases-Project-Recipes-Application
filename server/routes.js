@@ -15,94 +15,94 @@ connection.connect((err) => err && console.log(err));
 // Route: GET /random_recipe
 const random_recipe = async function(req, res) {
   connection.query(`
-<<<<<<< Updated upstream
-  SELECT id, name FROM Recipe
-  WHERE name='Bourbon Pecan Pound Cake'
-  `, (err, data) => {
-    if (err || data.length === 0) {
-      console.log(err);
-      res.json({});
-    } else {
-      res.json({
-        id: data[0].id,
-        name: data[0].name,
-      });
-    }
-  });
-}
-
-// GET /given_recipe/:recipe_id
-const given_recipe = async function(req, res) {
-  const recipe_id = req.params.recipe_id;
-  console.log(recipe_id);
-
-  connection.query(`
-    WITH GivenRecipe AS (
-      SELECT DISTINCT *
-      FROM Recipe r
-      JOIN RecipeIngredient ri on r.id = ri.recipe_id
-      WHERE r.id = ${recipe_id}
-    )
     SELECT
-      r.id,
-      r.name,
-      AVG(rt.rating) as avg_rating,
-      r.calories,
-      COUNT(DISTINCT ri.ingredient_id) AS num_common_ingredients
-    FROM Recipe r
-    JOIN RecipeIngredient ri on r.id = ri.recipe_id
-    JOIN Rating rt ON rt.recipe_id = r.id
-    WHERE r.id <> ${recipe_id}
-    AND r.calories BETWEEN (SELECT AVG(0.9 * calories) FROM GivenRecipe) AND (SELECT AVG(1.1 * calories) FROM GivenRecipe)
-    AND ri.ingredient_id IN (
-      SELECT DISTINCT ingredient_id
-      FROM GivenRecipe
-    )
-    GROUP BY r.id, r.name
-    ORDER BY num_common_ingredients DESC, avg_rating DESC
-    LIMIT 5
+      *
+    FROM Recipe
+    WHERE LENGTH(description)>=1000
+    ORDER BY RAND()
+    LIMIT 1
   `, (err, data) => {
     if (err || data.length === 0) {
       console.log(err);
       res.json({});
     } else {
-      res.json(data);
+      res.json(data[0])
     }
   });
 }
 
-// GET /specific_ingredients/ingredients
-const specific_ingredients = async function(req, res) {
-  const ingredients = req.params.ingredients.split(',');
-  connection.query(`
-  SELECT DISTINCT
-    r.id,
-    r.name,
-    r.description,
-    r.minute,
-    r.n_steps,
-    r.n_ingredients,
-    r.calories,
-    r.average_rating,
-    r.n_ratings
-  FROM Recipe r
-  JOIN RecipeIngredient ri on r.id = ri.recipe_id
-  JOIN Ingredient i ON i.id = ri.ingredient_id
-  WHERE i.ingredient IN (?)
-  GROUP BY r.id, r.name
-  HAVING COUNT(DISTINCT ri.ingredient_id) = ?
-  LIMIT 5
-  ;  
-  `, [ingredients, ingredients.length], (err, data) => {
-    if (err || data.length === 0) {
-      console.log("here");
-      console.log(err);
-      res.json({});
-    } else {
-      res.json(data);
-    }
-  });
-}
+// // GET /given_recipe/:recipe_id
+// const given_recipe = async function(req, res) {
+//   const recipe_id = req.params.recipe_id;
+//   console.log(recipe_id);
+
+//   connection.query(`
+//     WITH GivenRecipe AS (
+//       SELECT DISTINCT *
+//       FROM Recipe r
+//       JOIN RecipeIngredient ri on r.id = ri.recipe_id
+//       WHERE r.id = ${recipe_id}
+//     )
+//     SELECT
+//       r.id,
+//       r.name,
+//       AVG(rt.rating) as avg_rating,
+//       r.calories,
+//       COUNT(DISTINCT ri.ingredient_id) AS num_common_ingredients
+//     FROM Recipe r
+//     JOIN RecipeIngredient ri on r.id = ri.recipe_id
+//     JOIN Rating rt ON rt.recipe_id = r.id
+//     WHERE r.id <> ${recipe_id}
+//     AND r.calories BETWEEN (SELECT AVG(0.9 * calories) FROM GivenRecipe) AND (SELECT AVG(1.1 * calories) FROM GivenRecipe)
+//     AND ri.ingredient_id IN (
+//       SELECT DISTINCT ingredient_id
+//       FROM GivenRecipe
+//     )
+//     GROUP BY r.id, r.name
+//     ORDER BY num_common_ingredients DESC, avg_rating DESC
+//     LIMIT 5
+//   `, (err, data) => {
+//     if (err || data.length === 0) {
+//       console.log(err);
+//       res.json({});
+//     } else {
+//       res.json(data);
+//     }
+//   });
+// }
+
+// // GET /specific_ingredients/ingredients
+// const specific_ingredients = async function(req, res) {
+//   const ingredients = req.params.ingredients.split(',');
+//   connection.query(`
+//   SELECT DISTINCT
+//     r.id,
+//     r.name,
+//     r.description,
+//     r.minute,
+//     r.n_steps,
+//     r.n_ingredients,
+//     r.calories,
+//     r.average_rating,
+//     r.n_ratings
+//   FROM Recipe r
+//   JOIN RecipeIngredient ri on r.id = ri.recipe_id
+//   JOIN Ingredient i ON i.id = ri.ingredient_id
+//   WHERE i.ingredient IN (?)
+//   GROUP BY r.id, r.name
+//   HAVING COUNT(DISTINCT ri.ingredient_id) = ?
+//   LIMIT 5
+//   ;  
+//   `, [ingredients, ingredients.length], (err, data) => {
+//     if (err || data.length === 0) {
+//       console.log("here");
+//       console.log(err);
+//       res.json({});
+//     } else {
+//       res.json(data);
+//     }
+//   });
+// }
 
 // GET /top_contributors
 const top_contributors = async function(req, res) {
@@ -204,23 +204,44 @@ const search_filters = async function(req, res) {
       calories,
       average_rating,
       n_ratings
-=======
-    SELECT
-      *
->>>>>>> Stashed changes
     FROM Recipe
-    WHERE LENGTH(description)>=1000
-    ORDER BY RAND()
-    LIMIT 1
-  `, (err, data) => {
+    WHERE name LIKE '%${searchBar}%'
+    `;
+  if (ingredientsCount > 0) {
+    query += `
+      AND id IN (
+        SELECT DISTINCT recipe_id
+        FROM RecipeIngredient
+        WHERE ingredient_id IN (
+          SELECT id
+          FROM Ingredient
+          WHERE ingredient IN (${ingredients.map(() => '?').join(',')})
+        )
+        GROUP BY recipe_id
+        HAVING COUNT(DISTINCT ingredient_id) = ${ingredientsCount}
+      )
+    `;
+  }
+  query += `
+    AND calories BETWEEN ${minCalories} AND ${maxCalories}
+    AND n_ratings >= ${minNumRatings}
+    AND average_rating >= ${minRating}
+    AND n_steps <= ${maxNumSteps}
+    AND minute <= ${maxTime}
+    ORDER BY n_ratings DESC, average_rating DESC
+    LIMIT ${numResults}
+  `;
+  connection.query(query, ingredients, (err, data) => {
     if (err || data.length === 0) {
+      console.log(query);
       console.log(err);
       res.json({});
     } else {
-      res.json(data[0])
+      console.log("Responding with search_filters route.");
+      res.json(data);
     }
   });
-}
+};
 
 // Route: GET /recipe/:recipe_id
 const recipe = async function(req, res) {
@@ -358,6 +379,10 @@ const top_tags = async function(req, res) {
 
 
 module.exports = {
+  given_recipe,
+  top_contributors,
+  specific_ingredients,
+  search_filters,
   random_recipe,
   recipe,
   recipe_ingredient,
