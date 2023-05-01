@@ -379,9 +379,7 @@ const top_tags = async function(req, res) {
 
 
 module.exports = {
-  given_recipe,
   top_contributors,
-  specific_ingredients,
   search_filters,
   random_recipe,
   recipe,
