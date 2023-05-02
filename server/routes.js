@@ -31,45 +31,45 @@ const random_recipe = async function(req, res) {
   });
 }
 
-// // GET /given_recipe/:recipe_id
-// const given_recipe = async function(req, res) {
-//   const recipe_id = req.params.recipe_id;
-//   console.log(recipe_id);
+// GET /given_recipe/:recipe_id
+const given_recipe = async function(req, res) {
+  const recipe_id = req.params.recipe_id;
+  console.log(recipe_id);
 
-//   connection.query(`
-//     WITH GivenRecipe AS (
-//       SELECT DISTINCT *
-//       FROM Recipe r
-//       JOIN RecipeIngredient ri on r.id = ri.recipe_id
-//       WHERE r.id = ${recipe_id}
-//     )
-//     SELECT
-//       r.id,
-//       r.name,
-//       AVG(rt.rating) as avg_rating,
-//       r.calories,
-//       COUNT(DISTINCT ri.ingredient_id) AS num_common_ingredients
-//     FROM Recipe r
-//     JOIN RecipeIngredient ri on r.id = ri.recipe_id
-//     JOIN Rating rt ON rt.recipe_id = r.id
-//     WHERE r.id <> ${recipe_id}
-//     AND r.calories BETWEEN (SELECT AVG(0.9 * calories) FROM GivenRecipe) AND (SELECT AVG(1.1 * calories) FROM GivenRecipe)
-//     AND ri.ingredient_id IN (
-//       SELECT DISTINCT ingredient_id
-//       FROM GivenRecipe
-//     )
-//     GROUP BY r.id, r.name
-//     ORDER BY num_common_ingredients DESC, avg_rating DESC
-//     LIMIT 5
-//   `, (err, data) => {
-//     if (err || data.length === 0) {
-//       console.log(err);
-//       res.json({});
-//     } else {
-//       res.json(data);
-//     }
-//   });
-// }
+  connection.query(`
+    WITH GivenRecipe AS (
+      SELECT DISTINCT *
+      FROM Recipe r
+      JOIN RecipeIngredient ri on r.id = ri.recipe_id
+      WHERE r.id = ${recipe_id}
+    )
+    SELECT
+      r.id,
+      r.name,
+      AVG(rt.rating) as avg_rating,
+      r.calories,
+      COUNT(DISTINCT ri.ingredient_id) AS num_common_ingredients
+    FROM Recipe r
+    JOIN RecipeIngredient ri on r.id = ri.recipe_id
+    JOIN Rating rt ON rt.recipe_id = r.id
+    WHERE r.id <> ${recipe_id}
+    AND r.calories BETWEEN (SELECT AVG(0.9 * calories) FROM GivenRecipe) AND (SELECT AVG(1.1 * calories) FROM GivenRecipe)
+    AND ri.ingredient_id IN (
+      SELECT DISTINCT ingredient_id
+      FROM GivenRecipe
+    )
+    GROUP BY r.id, r.name
+    ORDER BY num_common_ingredients DESC, avg_rating DESC
+    LIMIT 5
+  `, (err, data) => {
+    if (err || data.length === 0) {
+      console.log(err);
+      res.json({});
+    } else {
+      res.json(data);
+    }
+  });
+}
 
 // // GET /specific_ingredients/ingredients
 // const specific_ingredients = async function(req, res) {
@@ -379,6 +379,7 @@ const top_tags = async function(req, res) {
 
 
 module.exports = {
+  given_recipe,
   top_contributors,
   search_filters,
   random_recipe,

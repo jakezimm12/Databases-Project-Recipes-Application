@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import {Container, Box, Grid, Paper, Typography} from '@mui/material';
+import {Link} from 'react-router-dom';
 
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
@@ -32,12 +33,16 @@ export default function RecipePage() {
   const [ingredientData, setIngredientData] = React.useState([]);
   const [tagData, setTagData] = React.useState([]);
   const [stepData, setStepData] = React.useState([]);
+  const [similarRecipeData, setSimilarRecipeData] = React.useState([]);
 
   React.useEffect(() => {
   fetch(`http://${config.server_host}:${config.server_port}/recipe/${recipe_id}`)
     .then(res => res.json())
     .then(resJson => setRecipeData(resJson))
-
+    
+  fetch(`http://${config.server_host}:${config.server_port}/given_recipe/${recipe_id}`)
+    .then(res => res.json())
+    .then(resJson => setSimilarRecipeData(resJson))
 
   fetch(`http://${config.server_host}:${config.server_port}/recipe/${recipe_id}/ingredient`)
     .then(res => res.json())
@@ -50,9 +55,10 @@ export default function RecipePage() {
   fetch(`http://${config.server_host}:${config.server_port}/recipe/${recipe_id}/step`)
     .then(res => res.json())
     .then(resJson => setStepData(resJson))
-  }, [recipe_id]);
+  }, [recipe_id])
+  ;
 
-  const stepNumData = stepData.map((step) => ({step_num: `${step.step_n}. ${step.step}`, ...step}))
+  const stepNumData = stepData.map((step) => ({step_num: `${step.step_n}. ${step.step}`, ...step}));
 
   return (
 
@@ -161,7 +167,32 @@ export default function RecipePage() {
 
           </Paper>
         </Grid>
+        <Grid item xs={12}>
+          <Paper sx={{ p: 2,}}>
 
+            <Typography variant="h5" align="left" gutterBottom>
+              Similar Recipes
+            </Typography>
+
+            <List>
+              {similarRecipeData.map((recipe) =>
+              <ListItem>
+                <Link to={`/recipe/${recipe.id}`}>
+                  <ListItemText primary={recipe.name} />
+                </Link>
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="right">Calories: {recipe.calories}</TableCell>
+                    <TableCell align="right">Rating: {recipe.avg_rating} </TableCell>
+                    <TableCell align="right">Common Ingredients: {recipe.num_common_ingredients}</TableCell>
+                  </TableRow>
+                </TableHead>
+              </ListItem>
+              )}
+            </List>
+
+          </Paper>
+        </Grid>
 
       </Grid>
       </Container>

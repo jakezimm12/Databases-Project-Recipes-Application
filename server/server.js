@@ -11,6 +11,7 @@ app.use(cors({
 // We use express to define our various API endpoints and
 // provide their handlers that we implemented in routes.js
 
+app.get('/given_recipe/:recipe_id', routes.given_recipe);
 app.get('/top_contributors', routes.top_contributors);
 app.get('/search_filters', routes.search_filters);
 
