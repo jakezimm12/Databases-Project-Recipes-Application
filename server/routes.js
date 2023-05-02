@@ -152,70 +152,45 @@ const top_contributors = async function(req, res) {
   });
 }
 
-// GET /search_filters
-const search_filters = async function(req, res) {
-  const searchBar = req.query.searchBar ?? '';
-  let ingredients = '';
-  if (req.query.ingredients && req.query.ingredients.trim() !== '') {
-    ingredients = req.query.ingredients.trim().split(',');
-  }
-  let ingredientsCount = 0;
-  if (ingredients) {
-    ingredientsCount = ingredients.length;
-  }
-  console.log("Ingredients: " + ingredients[0] + ingredients[1]);
-  let minCalories = 0;
-  if(req.query.minCalories && req.query.minCalories >= 0){
-    minCalories = req.query.minCalories;
-  }
-  let maxCalories = 100000;
-  if(req.query.maxCalories && req.query.maxCalories > 0){
-    maxCalories = req.query.maxCalories;
-  }
-  let minNumRatings = 0;
-  if(req.query.minNumRatings && req.query.minNumRatings >= 0){
-    minNumRatings = req.query.minNumRatings;
-  }
-  let minRating = 0;
-  if(req.query.minRating && req.query.minRating >= 0){
-    minRating = req.query.minRating;
-  }
-  let maxNumSteps = 10000;
-  if(req.query.maxNumSteps && req.query.maxNumSteps > 0){
-    maxNumSteps = req.query.maxNumSteps;
-  }
-  let maxTime = 10000;
-  if(req.query.maxTime && req.query.maxTime > 0){
-    maxTime = req.query.maxTime;
-  }
-  let numResults = 10;
-  if(req.query.numResults && req.query.numResults >= 0){
-    numResults = req.query.numResults;
-  }
+// GET /search_recipe
+const search_recipe = async function(req, res) {
+  const name = req.query.name ? `%${req.query.name}%` : '%';
+
+  const ingredient = req.query.ingredient ?? '';
+  const ingredients = ingredient!='' ? ingredient.split(',') : [];
+  const ingredientsCount = ingredients.length;
+
+  const maxNumIngredient = req.query.maxNumIngredient ?? 20;
+  const maxNumSteps = req.query.maxNumSteps ?? 20;
+  const maxTime = req.query.maxTime ?? 120;
+
+  const maxCalories = req.query.maxCalories ?? 1000;
+
+  const minNumRatings = req.query.minNumRatings ?? 0;
+  const minRating = req.query.minRating ?? 0;
+
+  const pageSize = req.query.page_size ?? 10;
 
   let query = `
     SELECT
-      id,
-      name,
-      description,
-      minute,
-      n_steps,
-      n_ingredients,
-      calories,
-      average_rating,
-      n_ratings
-    FROM Recipe
-    WHERE name LIKE '%${searchBar}%'
+      R.id,
+      R.name,
+      ROUND(RR.avg_rating, 1) AS avg_rating,
+      RR.num_rating
+    FROM Recipe R
+    JOIN RecipeRating RR
+      ON RR.id = R.id
+    WHERE RR.name LIKE '${name}'
     `;
   if (ingredientsCount > 0) {
     query += `
-      AND id IN (
+      AND R.id IN (
         SELECT DISTINCT recipe_id
         FROM RecipeIngredient
         WHERE ingredient_id IN (
           SELECT id
           FROM Ingredient
-          WHERE ingredient IN (${ingredients.map(() => '?').join(',')})
+          WHERE ingredient IN (${ingredients.map((i) => `'${i}'`).join(',')})
         )
         GROUP BY recipe_id
         HAVING COUNT(DISTINCT ingredient_id) = ${ingredientsCount}
@@ -223,21 +198,20 @@ const search_filters = async function(req, res) {
     `;
   }
   query += `
-    AND calories BETWEEN ${minCalories} AND ${maxCalories}
-    AND n_ratings >= ${minNumRatings}
-    AND average_rating >= ${minRating}
-    AND n_steps <= ${maxNumSteps}
-    AND minute <= ${maxTime}
+    AND R.n_ingredients <= ${maxNumIngredient}
+    AND R.n_steps <= ${maxNumSteps}
+    AND R.minute <= ${maxTime}
+    AND R.calories <= ${maxCalories}
+    AND RR.avg_rating >= ${minRating}
+    AND RR.num_rating >= ${minNumRatings}
     ORDER BY n_ratings DESC, average_rating DESC
-    LIMIT ${numResults}
+    LIMIT ${pageSize}
   `;
   connection.query(query, ingredients, (err, data) => {
     if (err || data.length === 0) {
-      console.log(query);
-      console.log(err);
       res.json({});
+      console.log(err);
     } else {
-      console.log("Responding with search_filters route.");
       res.json(data);
     }
   });
@@ -324,17 +298,14 @@ const recipe_step= async function(req, res) {
 // Route: GET /top_recipes
 const top_recipes = async function(req, res) {
   connection.query(`
-    SELECT
-        R.id,
-        R.name,
-        AVG(R2.rating) AS avg_rating,
-        COUNT(R2.rating) AS num_rating,
-        AVG(R2.rating) * COUNT(R2.rating) / (SELECT COUNT(DISTINCT user_id) FROM Rating) AS score
-    FROM Recipe R
-    JOIN Rating R2 ON R.id = R2.recipe_id
-    GROUP BY R.id, R.name
-    ORDER BY 4 DESC
-    LIMIT 10
+      SELECT
+          id,
+          name,
+          ROUND(avg_rating, 1) AS avg_rating,
+          num_rating
+      FROM RecipeRating
+      ORDER BY score DESC
+      LIMIT 10
     `, (err, data) => {
     if (err || data.length === 0) {
       console.log(err);
@@ -381,7 +352,7 @@ const top_tags = async function(req, res) {
 module.exports = {
   given_recipe,
   top_contributors,
-  search_filters,
+  search_recipe,
   random_recipe,
   recipe,
   recipe_ingredient,
