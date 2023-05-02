@@ -10,14 +10,7 @@ import Paper from '@mui/material/Paper';
 
 const config = require('../config.json');
 
-export default function RecipeTable({defaultPageSize, rowsPerPageOptions }) {
-  const [recipeData, setRecipeData] = React.useState([]);
-
-  React.useEffect(() => {
-  fetch(`http://${config.server_host}:${config.server_port}/top_recipes`)
-    .then(res => res.json())
-    .then(resJson => setRecipeData(resJson))
-  }, []);
+export default function RecipeTable({recipeData}) {
 
   return (
     <TableContainer component={Paper}>
@@ -35,7 +28,6 @@ export default function RecipeTable({defaultPageSize, rowsPerPageOptions }) {
           {recipeData.map((row) => (
             <TableRow
               key={row.name}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
             >
               <TableCell scope="row" component={Link} to={`/recipe/${row.id}`}>{row.name}</TableCell>
               <TableCell align="right">{row.avg_rating}</TableCell>

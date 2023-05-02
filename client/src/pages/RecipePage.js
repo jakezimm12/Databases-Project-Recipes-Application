@@ -64,7 +64,7 @@ export default function RecipePage() {
           <Paper sx={{ p: 2,}}>
 
             <Typography variant="h4" align="left" gutterBottom>
-            {recipeData.name}
+              {recipeData.name}
             </Typography>
 
             <Box sx={{width: 0, display: "flex", alignItems: "left"}}>

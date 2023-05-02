@@ -12,13 +12,14 @@ app.use(cors({
 // provide their handlers that we implemented in routes.js
 
 app.get('/top_contributors', routes.top_contributors);
-app.get('/search_filters', routes.search_filters);
 
 app.get('/random_recipe', routes.random_recipe);
 app.get('/recipe/:recipe_id', routes.recipe);
 app.get('/recipe/:recipe_id/ingredient', routes.recipe_ingredient);
 app.get('/recipe/:recipe_id/tag', routes.recipe_tag);
 app.get('/recipe/:recipe_id/step', routes.recipe_step);
+
+app.get('/search_recipe', routes.search_recipe);
 app.get('/top_recipes', routes.top_recipes);
 app.get('/top_tags', routes.top_tags);
 

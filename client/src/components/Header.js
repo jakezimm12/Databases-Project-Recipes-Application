@@ -17,7 +17,6 @@ import { Link } from 'react-router-dom';
 const pages = [
   {name: 'Search', link: '/search'},
   {name: 'Ranking', link: '/ranking'},
-  {name: 'Quiz', link: '/quiz'}
 ];
 
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];

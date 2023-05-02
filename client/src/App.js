@@ -16,7 +16,6 @@ function App() {
           <Route path="/ranking" element={<RankingPage/>} />
           <Route path="/recipe/:recipe_id" element={<RecipePage/>} />
           <Route path="/search" element={<SearchPage/>} />
-          <Route path="/quiz" element={<RecipeGuesser/>} />
         </Routes>
       </BrowserRouter>
     </div>
