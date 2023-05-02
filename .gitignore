@@ -1,5 +1,7 @@
-
-data/.DS_Store
 *.csv
-.DS_Store
-.DS_Store
+*.json
+
+client/node_modules/*
+server/node_modules/*
+
+*.DS_Store
