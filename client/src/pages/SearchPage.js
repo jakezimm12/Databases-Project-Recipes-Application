@@ -7,14 +7,6 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 import { Button, Slider, TextField, Typography, Autocomplete } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
-import {Link} from 'react-router-dom';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-
 import Header from '../components/Header';
 import RecipeTable from '../components/RecipeTable';
 
@@ -36,7 +28,7 @@ export default function SearchPage() {
   const [minNumRatings, setMinNumRatings] = React.useState(0);
   const [minRating, setMinRating] = React.useState(0);
 
-  const [recipeData, setRecipeData] = React.useState({});
+  const [recipeData, setRecipeData] = React.useState([]);
 
   React.useEffect(() => {
     fetch(`http://${config.server_host}:${config.server_port}/search_recipe`)
@@ -64,6 +56,7 @@ export default function SearchPage() {
             }
         });
     }
+
   return (
 
     <ThemeProvider theme={theme}>
@@ -78,17 +71,111 @@ export default function SearchPage() {
 
             <Grid container spacing={2}>
               <Grid item xs={6}>
-                <TextField label='Recipe name' value={name} onChange={(e) => setName(e.target.value)} style={{ width: "100%" }}/>
+                <TextField
+                  label='Recipe name'
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  style={{ width: "100%" }}
+                />
               </Grid>
               <Grid item xs={6}>
-                <TextField label='Ingredient' value={ingredient} onChange={(e) => setIngredient(e.target.value)} style={{ width: "100%" }}/>
+                <TextField
+                  label='Ingredient'
+                  value={ingredient}
+                  onChange={(e) => setIngredient(e.target.value)}
+                  style={{ width: "100%" }}
+                  />
               </Grid>
+
+              <Grid item xs={4}>
+                <Typography component="p" variant="body2" align="center" gutterBottom>
+                  Max Number of Ingredients
+                </Typography>
+                <Slider
+                  value={maxNumIngredient}
+                  min={0}
+                  max={20}
+                  step={1}
+                  onChange={(e, newValue) => setMaxNumIngredient(newValue)}
+                  valueLabelDisplay='auto'
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <Typography component="p" variant="body2" align="center" gutterBottom>
+                  Max Number of Steps
+                </Typography>
+                <Slider
+                  value={maxNumSteps}
+                  min={0}
+                  max={20}
+                  step={1}
+                  onChange={(e, newValue) => setMaxNumSteps(newValue)}
+                  valueLabelDisplay='auto'
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <Typography component="p" variant="body2" align="center" gutterBottom>
+                  Max Time (Minutes)
+                </Typography>
+                <Slider
+                  value={maxTime}
+                  min={0}
+                  max={120}
+                  step={10}
+                  onChange={(e, newValue) => setMaxTime(newValue)}
+                  valueLabelDisplay='auto'
+                />
+              </Grid>
+
+              <Grid item xs={4}>
+                <Typography component="p" variant="body2" align="center" gutterBottom>
+                  Max Calories
+                </Typography>
+                <Slider
+                  value={maxCalories}
+                  min={0}
+                  max={1000}
+                  step={100}
+                  onChange={(e, newValue) => setMaxCalories(newValue)}
+                  valueLabelDisplay='auto'
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <Typography component="p" variant="body2" align="center" gutterBottom>
+                  Min Number of Ratings
+                </Typography>
+                <Slider
+                  value={minNumRatings}
+                  min={0}
+                  max={1000}
+                  step={100}
+                  onChange={(e, newValue) => setMinNumRatings(newValue)}
+                  valueLabelDisplay='auto'
+                />
+              </Grid>
+              <Grid item xs={4}>
+                <Typography component="p" variant="body2" align="center" gutterBottom>
+                  Min Rating
+                </Typography>
+                <Slider
+                  value={minRating}
+                  min={0}
+                  max={5}
+                  step={1}
+                  onChange={(e, newValue) => setMinRating(newValue)}
+                  valueLabelDisplay='auto'
+                />
+              </Grid>
+
             </Grid>
             
-            <Button onClick={() => search() }>
-              Search
-            </Button>
+            <Paper sx={{p: 2,}}>
+              <Button variant="contained" onClick={() => search() }>
+                Search
+              </Button>
+            </Paper>
 
+            <RecipeTable recipeData={recipeData}/>
 
           </Container>
     </ThemeProvider>

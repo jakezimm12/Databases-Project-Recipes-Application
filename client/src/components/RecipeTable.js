@@ -1,11 +1,6 @@
 import * as React from 'react';
-import {Link} from 'react-router-dom';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
+import { Link } from 'react-router-dom';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import Paper from '@mui/material/Paper';
 
 const config = require('../config.json');
@@ -18,7 +13,10 @@ export default function RecipeTable({recipeData}) {
 
         <TableHead>
           <TableRow>
-            <TableCell>Name</TableCell>
+            <TableCell aling="right">Name</TableCell>
+            <TableCell align="right">Number of Ingredients</TableCell>
+            <TableCell align="right">Number of Steps</TableCell>
+            <TableCell align="right">Minutes</TableCell>
             <TableCell align="right">Average Rating</TableCell>
             <TableCell align="right">Number of Ratings</TableCell>
           </TableRow>
@@ -30,6 +28,9 @@ export default function RecipeTable({recipeData}) {
               key={row.name}
             >
               <TableCell scope="row" component={Link} to={`/recipe/${row.id}`}>{row.name}</TableCell>
+              <TableCell align="right">{row.n_ingredients}</TableCell>
+              <TableCell align="right">{row.n_steps}</TableCell>
+              <TableCell align="right">{row.minute}</TableCell>
               <TableCell align="right">{row.avg_rating}</TableCell>
               <TableCell align="right">{row.num_rating}</TableCell>
             </TableRow>
