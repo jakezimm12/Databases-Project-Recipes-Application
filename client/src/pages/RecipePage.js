@@ -1,15 +1,26 @@
 import * as React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { styled } from '@mui/material/styles';
 import {Container, Box, Grid, Paper, Typography} from '@mui/material';
+import {Link} from 'react-router-dom';
 
-import { Divider, Stack } from '@mui/material';
-
+import Divider from '@mui/material/Divider';
+import Stack from '@mui/material/Stack';
 import Chip from '@mui/material/Chip';
 import Rating from '@mui/material/Rating';
 
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
-import { List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 
 import Header from '../components/Header';
 
@@ -22,12 +33,16 @@ export default function RecipePage() {
   const [ingredientData, setIngredientData] = React.useState([]);
   const [tagData, setTagData] = React.useState([]);
   const [stepData, setStepData] = React.useState([]);
-  const [commonIngredientData, setCommonIngredientData] = React.useState([]);
+  const [similarRecipeData, setSimilarRecipeData] = React.useState([]);
 
   React.useEffect(() => {
   fetch(`http://${config.server_host}:${config.server_port}/recipe/${recipe_id}`)
     .then(res => res.json())
     .then(resJson => setRecipeData(resJson))
+    
+  fetch(`http://${config.server_host}:${config.server_port}/given_recipe/${recipe_id}`)
+    .then(res => res.json())
+    .then(resJson => setSimilarRecipeData(resJson))
 
   fetch(`http://${config.server_host}:${config.server_port}/recipe/${recipe_id}/ingredient`)
     .then(res => res.json())
@@ -40,13 +55,10 @@ export default function RecipePage() {
   fetch(`http://${config.server_host}:${config.server_port}/recipe/${recipe_id}/step`)
     .then(res => res.json())
     .then(resJson => setStepData(resJson))
+  }, [recipe_id])
+  ;
 
-  fetch(`http://${config.server_host}:${config.server_port}/recipe/${recipe_id}/common_ingredient`)
-    .then(res => res.json())
-    .then(resJson => setCommonIngredientData(resJson))
-  }, [recipe_id]);
-
-  const stepNumData = stepData.map((step) => ({step_num: `${step.step_n}. ${step.step}`, ...step}))
+  const stepNumData = stepData.map((step) => ({step_num: `${step.step_n}. ${step.step}`, ...step}));
 
   return (
 
@@ -155,47 +167,32 @@ export default function RecipePage() {
 
           </Paper>
         </Grid>
-
         <Grid item xs={12}>
           <Paper sx={{ p: 2,}}>
 
             <Typography variant="h5" align="left" gutterBottom>
               Similar Recipes
             </Typography>
-            <Typography variant="body1" align="left" gutterBottom>
-              Have these ingredients but want something else? Here's what else you can make:
-            </Typography>
+
+            <List>
+              {similarRecipeData.map((recipe) =>
+              <ListItem>
+                <Link to={`/recipe/${recipe.id}`}>
+                  <ListItemText primary={recipe.name} />
+                </Link>
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="right">Calories: {recipe.calories}</TableCell>
+                    <TableCell align="right">Rating: {recipe.avg_rating} </TableCell>
+                    <TableCell align="right">Common Ingredients: {recipe.num_common_ingredients}</TableCell>
+                  </TableRow>
+                </TableHead>
+              </ListItem>
+              )}
+            </List>
+
           </Paper>
-
-          <TableContainer component={Paper}>
-            <Table sx={{ minWidth: 650 }} aria-label="simple table">
-
-                    <TableHead>
-                      <TableRow>
-                        <TableCell aling="right">Name</TableCell>
-                        <TableCell align="right">Number of Common Ingredients</TableCell>
-                        <TableCell align="right">Average Rating</TableCell>
-                        <TableCell align="right">Number of Ratings</TableCell>
-                      </TableRow>
-                    </TableHead>
-
-                    <TableBody>
-                      {commonIngredientData.map((row) => (
-                        <TableRow
-                          key={row.name}
-                        >
-                          <TableCell scope="row" component={Link} to={`/recipe/${row.id}`}>{row.name}</TableCell>
-                          <TableCell align="right">{row.num_common_ingredient}</TableCell>
-                          <TableCell align="right">{row.avg_rating}</TableCell>
-                          <TableCell align="right">{row.num_rating}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-
-            </Table>
-          </TableContainer>
         </Grid>
-
 
       </Grid>
       </Container>
