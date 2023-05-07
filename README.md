@@ -6,7 +6,7 @@ In the contemporary digital landscape, users are often confronted with an overwh
 
 ## Database Schema
 User (id)
-### of instances: 236719 instances
+Number of instances: 236719 instances
 
 Recipe (id, name, user_id, date, description, minute, n_steps, n_ingredients, calories, total_fat, sugar, sodium, protein, saturated_fat)
 user_id FOREIGN KEY REFERENCES User (id)
@@ -43,4 +43,4 @@ Number of instances: 1114719 instances
 ## Third Normal Form (3NF) Justification
 The schema above is already in its third normal form. Each table adheres to the conditions required for 3NF. Recall that a non-prime attribute is an attribute that is a part of no candidate keys. In the case of the User table, there is only a single attribute (id), which serves as the primary key with no non-prime attributes. The Recipe table is also in 3NF because all non-prime attributes are fully functionally dependent on the primary key (id), and the foreign key user_id establishes a relationship with the User table without introducing any transitive dependencies. The RecipeStep table satisfies 3NF, as the primary key is recipe_id, and the other attributes (step, step_n) are dependent on the recipe_id without any transitive dependencies. Similarly, the Ingredient table adheres to 3NF because there are only two attributes (id and ingredient), with the primary key (id), uniquely determining the ingredient name. The RecipeIngredient table is in 3NF, as it is a linking table with a composite primary key (recipe_id and ingredient_id) that represents a many-to-many relationship between the Recipe and Ingredient tables, with no non-prime attributes or transitive dependencies. The Tag table is also in 3NF since there are only two attributes (id and tag), and the primary key (id) determines the tag name uniquely. The RecipeTag table follows 3NF for a reason similar to that of the RecipeIngredient table. Lastly, the Rating table is in 3NF, as it has a composite primary key (user_id and recipe_id), with non-prime attributes (date, rating, and review) being fully dependent on the primary key and no transitive dependencies present. 
 
-## Check out the RecipeFinder Project Description PDF for a more in-depth explanation of the application.
+## Check out the [RecipeFinder Project Description PDF](RecipeFinder Project Description.pdf) for a more in-depth explanation of the application.
