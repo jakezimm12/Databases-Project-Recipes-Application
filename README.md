@@ -12,32 +12,32 @@ User (id)
 
 Recipe (id, name, user_id, date, description, minute, n_steps, n_ingredients, calories, total_fat, sugar, sodium, protein, saturated_fat)
 user_id FOREIGN KEY REFERENCES User (id)
-### of instances: 228172 instances
+Number of instances: 228172 instances
 
 RecipeStep (recipe_id, step, step_n)
 recipe_id FOREIGN KEY REFERENCES Recipe (id)
-### of instances: 696005 instances
+Number of instances: 696005 instances
 
 Ingredient (id, ingredient)
-### of instances: 13755 instances
+Number of instances: 13755 instances
 
 RecipeIngredient (recipe_id, ingredient_id)
 recipe_id FOREIGN KEY REFERENCES Recipe (id)
 ingredient_id FOREIGN KEY REFERENCES Recipe (id)
-### of instances: 2064986 instances
+Number of instances: 2064986 instances
 
 Tag (id, tag)
-### of instances: 551 instances
+Number of instances: 551 instances
 
 RecipeTag (recipe_id, tag_id)
 recipe_id FOREIGN KEY REFERENCES Recipe (id)
 tag_id FOREIGN KEY REFERENCES Tag(id)
-### of instances: 4078500 instances
+Number of instances: 4078500 instances
 
 Rating (user_id, recipe_id, date, rating, review)
 user_id FOREIGN KEY REFERENCES User (id)
 recipe_id FOREIGN KEY REFERENCES Recipe (id)
-### of instances: 1114719 instances
+Number of instances: 1114719 instances
 
 ## ER Diagram
 <img width="972" alt="Screen Shot 2023-05-07 at 11 08 51 AM" src="https://user-images.githubusercontent.com/65970260/236685826-22e7e31c-b3f0-4b7c-87fe-1ccbf457e765.png">
