@@ -5,36 +5,36 @@ https://user-images.githubusercontent.com/65970260/236685439-bb7bf749-adaa-4f14-
 In the contemporary digital landscape, users are often confronted with an overwhelming number of choices when searching for the ideal recipe. Websites like Food.com, for instance, host over 200,000 recipes, making it challenging for users to find a suitable dish unless they know precisely what they want. RecipeFinder aims to address this issue by providing a more personalized and efficient approach to recipe search and discovery. The primary motivation behind RecipeFinder is to simplify the recipe search process and cater to the unique preferences and dietary needs of each user. This platform is designed with the central goal of enabling users to find specific recipes based on customized parameters, thereby enhancing their overall culinary experience. RecipeFinder allows users to search for recipes using various parameters, such as ingredients, number of steps, preparation time, nutritional value, and more. By customizing the search criteria to match individual preferences and requirements, RecipeFinder facilitates the discovery of new dishes that align with users' distinct tastes. In addition to its core functionality, RecipeFinder encourages community engagement by providing users with the opportunity to share their creations, exchange suggestions, and connect with fellow food enthusiasts. This interactive environment fosters inspiration, creativity, and a shared passion for culinary exploration. RecipeFinder represents a significant advancement in recipe search and discovery by streamlining the process and personalizing it according to each user's unique tastes and preferences. By employing this innovative platform, users can overcome the challenges posed by an abundance of recipe choices and more efficiently navigate the vast culinary landscape.
 
 ## Database Schema
-User (id)
+User (<ins>id</ins>)<br>
 Number of instances: 236719 instances
 
-Recipe (id, name, user_id, date, description, minute, n_steps, n_ingredients, calories, total_fat, sugar, sodium, protein, saturated_fat)
-user_id FOREIGN KEY REFERENCES User (id)
+Recipe (<ins>id</ins>, name, user_id, date, description, minute, n_steps, n_ingredients, calories, total_fat, sugar, sodium, protein, saturated_fat)<br>
+user_id FOREIGN KEY REFERENCES User (id)<br>
 Number of instances: 228172 instances
 
-RecipeStep (recipe_id, step, step_n)
-recipe_id FOREIGN KEY REFERENCES Recipe (id)
+RecipeStep (<ins>recipe_id</ins>, step, step_n)<br>
+recipe_id FOREIGN KEY REFERENCES Recipe (id)<br>
 Number of instances: 696005 instances
 
-Ingredient (id, ingredient)
+Ingredient (<ins>id</ins>, ingredient)<br>
 Number of instances: 13755 instances
 
-RecipeIngredient (recipe_id, ingredient_id)
-recipe_id FOREIGN KEY REFERENCES Recipe (id)
-ingredient_id FOREIGN KEY REFERENCES Recipe (id)
+RecipeIngredient (<ins>recipe_id</ins>, <ins>ingredient_id</ins>)<br>
+recipe_id FOREIGN KEY REFERENCES Recipe (id)<br>
+ingredient_id FOREIGN KEY REFERENCES Recipe (id)<br>
 Number of instances: 2064986 instances
 
-Tag (id, tag)
+Tag (<ins>id</ins>, tag)<br>
 Number of instances: 551 instances
 
-RecipeTag (recipe_id, tag_id)
-recipe_id FOREIGN KEY REFERENCES Recipe (id)
-tag_id FOREIGN KEY REFERENCES Tag(id)
+RecipeTag (<ins>recipe_id</ins>, <ins>tag_id</ins>)<br>
+recipe_id FOREIGN KEY REFERENCES Recipe (id)<br>
+tag_id FOREIGN KEY REFERENCES Tag(id)<br>
 Number of instances: 4078500 instances
 
-Rating (user_id, recipe_id, date, rating, review)
-user_id FOREIGN KEY REFERENCES User (id)
-recipe_id FOREIGN KEY REFERENCES Recipe (id)
+Rating (<ins>user_id</ins>, <ins>recipe_id</ins>, date, rating, review)<br>
+user_id FOREIGN KEY REFERENCES User (id)<br>
+recipe_id FOREIGN KEY REFERENCES Recipe (id)<br>
 Number of instances: 1114719 instances
 
 ## ER Diagram
